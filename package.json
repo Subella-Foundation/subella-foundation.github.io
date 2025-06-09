@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:css": "npx @tailwindcss/cli -i ./src/app.css -o ./public/cdn/styles.css",
-    "dev": "npx pagefind --site \"public\""
+    "build:css": "npx @tailwindcss/cli -i ./src/app.css -o ./docs/cdn/styles.css",
+    "dev": "npx pagefind --site \"docs\""
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      try {
+        document.documentElement.setAttribute(
+          "data-theme",
+          localStorage.getItem("theme") || "light"
+        );
+      } catch (e) {}
+    </script>
+    <title>Document</title>
+    <base href="../" />
+    <link rel="stylesheet" href="cdn/styles.css" type="text/css" />
+    <link rel="stylesheet" href="cdn/daisyui.css" type="text/css" />
+    <script src="cdn/tailwindcss.js"></script>
+    <script defer src="cdn/alpinejs.min.js"></script>
+    <script defer src="cdn/htmx.min.js"></script>
+  </head>
+  <body
+    class="m-0 p-0"
+    hx-boost="true"
+    hx-target="#mainElement"
+    hx-select="#mainElement"
+    hx-swap="outerHTML"
+  >
+    <div
+      id="progress-container"
+      aria-label="Scroll Progress Bar"
+      class="fixed top-0 left-0 w-full z-[101] bg-transparent m-0 p-0 h-0 mt-[-12px]"
+    >
+      <progress
+        id="progress"
+        class="progress progress-accent w-full h-1.5 m-0 p-0 rounded-none"
+        value="0"
+        max="100"
+      ></progress>
+    </div>
+
+    <header
+      x-data="{ search: false }"
+      x-init="
+    $watch('search', value => {
+       if (typeof navbarScroll !== 'undefined') {
+        value ? navbarScroll.disable() : navbarScroll.enable();
+      }
+
+      document.querySelectorAll('[xw-search-hide]').forEach(el => el.classList.toggle('hidden', value));
+      document.querySelectorAll('[xw-search-show]').forEach(el => el.classList.toggle('hidden', !value));
+    });
+
+    document.body.addEventListener('htmx:beforeRequest', () => { $data.search = false });
+  "
+      class="w-full"
+    >
+      <div
+        id="navbar"
+        class="bg-base-100 shadow-sm transition-all duration-300 fixed w-full z-[99] top-0 left-0 pt-1.5"
+      >
+        <div class="navbar container mx-auto items-center">
+          <div class="navbar-start" x-show="!search">
+            <label
+              for="my-drawer"
+              tabindex="0"
+              role="button"
+              class="btn btn-ghost btn-circle"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h7"
+                />
+              </svg>
+            </label>
+
+            <div class="drawer">
+              <input id="my-drawer" type="checkbox" class="drawer-toggle" />
+              <div class="drawer-side">
+                <label
+                  for="my-drawer"
+                  aria-label="close sidebar"
+                  class="drawer-overlay"
+                ></label>
+                <div
+                  class="min-h-full w-80 p-4 bg-base-200 text-base-content flex flex-col"
+                >
+                  <div class="flex flex-row justify-between">
+                    <a class="btn btn-ghost text-xl">Subella.Org</a>
+                    <label
+                      role="button"
+                      for="my-drawer"
+                      aria-label="close sidebar"
+                      class="btn btn-ghost btn-circle ml-auto"
+                    >
+                      <svg
+                        class="swap-on fill-current h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 512 512"
+                      >
+                        <polygon
+                          points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <ul class="menu w-full">
+                    <li><a>Item 1</a></li>
+                    <li>
+                      <details closed="closed">
+                        <summary>Parent</summary>
+                        <ul>
+                          <li><a>Submenu 1</a></li>
+                          <li><a>Submenu 2</a></li>
+                          <li>
+                            <details closed="closed">
+                              <summary>Parent</summary>
+                              <ul>
+                                <li><a>Submenu 1</a></li>
+                                <li><a>Submenu 2</a></li>
+                              </ul>
+                            </details>
+                          </li>
+                        </ul>
+                      </details>
+                    </li>
+                    <li><a>Item 3</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="navbar-center" x-show="!search">
+            <a class="btn btn-ghost text-xl">Subella.Org</a>
+          </div>
+
+          <div
+            class="flex flex-1 mx-2"
+            x-show="search"
+            x-init="$watch('search', value => value && $nextTick(() => $refs.input.focus()))"
+          >
+            <input
+              id="search-box"
+              class="hidden input input-accent join-item w-full"
+              x-ref="input"
+              xw-search-show
+              placeholder="Search"
+            />
+          </div>
+
+          <div
+            class="navbar-end gap-2"
+            :class="{ 'w-[50%]': !search, 'w-fit': search }"
+          >
+            <label
+              for="theme-toggle"
+              role="button"
+              x-show="!search"
+              class="swap swap-rotate btn btn-ghost btn-circle"
+            >
+              <!-- this hidden checkbox controls the state -->
+              <input
+                id="theme-toggle"
+                type="checkbox"
+                class="theme-controller"
+                value="dark"
+              />
+
+              <!-- sun icon -->
+              <svg
+                class="swap-off h-6 w-6 fill-current"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"
+                />
+              </svg>
+
+              <!-- moon icon -->
+              <svg
+                class="swap-on h-5 w-5 fill-current m-auto"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"
+                />
+              </svg>
+            </label>
+            <label
+              role="button"
+              class="swap swap-flip btn btn-ghost btn-circle"
+            >
+              <input id="seachBtn" type="checkbox" x-model="search" />
+              <svg
+                class="swap-on fill-current h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+              >
+                <polygon
+                  points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49"
+                />
+              </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="swap-off h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </label>
+          </div>
+        </div>
+      </div>
+      <aside
+        class="h-screen fixed pt-20 w-full z-[51] bg-base-100"
+        x-show="search"
+      >
+        <div class="container mx-auto pt-4 w-full h-auto">
+          <div id="search-title" class="prose pb-4 px-4"></div>
+          <div class="h-dvh overflow-x-hidden overflow-y-auto px-0 sm:px-4">
+            <div
+              id="search-results"
+              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-7 gap-x-4 sm:gap-7 mb-10 pb-4 px-4 sm:px-3 -mx-1 sm:-mx-3 empty:hidden"
+            ></div>
+            <div id="load-more-container" class="text-center mb-50">
+              <button id="load-more-btn" class="btn btn-primary hidden">
+                Load More
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="explorer" class="container mx-auto">
+          <div>ok</div>
+        </div>
+      </aside>
+    </header>
+
+    <main class="min-h-screen container mx-auto px-4 [&>#mainElement]:pt-20">
+      <div id="mainElement">
+        <article
+          class="prose prose-img:rounded-lg prose-a:hover:text-secondary mx-auto max-w-full"
+        >
+          <header class="flex flex-col w-full">
+            <div class="mx-auto">
+              <h1 data-pagefind-meta="title" class="font-extrabold">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime
+                nemo et sint veniam tenetur commodi nihil doloremque dolorum
+                totam modi fuga iure eius.
+              </h1>
+            </div>
+            <div
+              class="flex flex-col lg:flex-row gap-0 lg:gap-4 mx-auto items-center"
+            >
+              <div class="flex flex-row items-center gap-4 w-fit">
+                <div class="avatar-group -space-x-6 not-prose">
+                  <div class="avatar">
+                    <div class="w-16 sm:w-8">
+                      <img
+                        src="https://img.daisyui.com/images/profile/demo/batperson@192.webp"
+                      />
+                    </div>
+                  </div>
+                  <div class="avatar">
+                    <div class="w-16 sm:w-8">
+                      <img
+                        src="https://img.daisyui.com/images/profile/demo/spiderperson@192.webp"
+                      />
+                    </div>
+                  </div>
+                  <div class="avatar">
+                    <div class="w-16 sm:w-8">
+                      <img
+                        src="https://img.daisyui.com/images/profile/demo/averagebulk@192.webp"
+                      />
+                    </div>
+                  </div>
+                  <div class="avatar">
+                    <div class="w-16 sm:w-8">
+                      <img
+                        src="https://img.daisyui.com/images/profile/demo/wonderperson@192.webp"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <p class="font-semibold">
+                  by
+                  <a href="" class="font-bold no-underline hover:underline"
+                    >Sourav Biswas</a
+                  >,
+                  <a href="" class="font-bold no-underline hover:underline"
+                    >Sankita Biswas</a
+                  >,
+                  <a href="" class="font-bold no-underline hover:underline"
+                    >Rajib Das</a
+                  >
+                  &
+                  <a href="" class="font-bold no-underline hover:underline"
+                    >Narendra Biswas</a
+                  >
+                </p>
+              </div>
+              <div class="hidden lg:block"><p class="font-semibold">—</p></div>
+              <div>
+                <p class="font-semibold flex flex-row gap-4 m-0 items-center">
+                  <svg
+                    class="-translate-y-px w-5 h-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path
+                      d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"
+                    ></path>
+                    <path d="M16 3l0 4"></path>
+                    <path d="M8 3l0 4"></path>
+                    <path d="M4 11l16 0"></path>
+                    <path d="M8 15h2v2h-2z"></path>
+                  </svg>
+                  <time
+                    datetime="2024-06-07"
+                    data-pagefind-meta="date[datetime]"
+                    data-pagefind-sort="date[datetime]"
+                    >Dec 05, 2023</time
+                  >
+                  <span>—</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+                    <path d="M12 7v5l3 3"></path>
+                  </svg>
+                  <span>01 min read</span>
+                </p>
+              </div>
+            </div>
+            <div class="mx-auto max-w-6xl">
+              <figure class="w-full aspect-[16/9]">
+                <img
+                  class="w-full h-full object-cover"
+                  data-pagefind-meta="image[src], image_alt[alt]"
+                  src="https://qurno-astro.vercel.app/_astro/02.BeU4SoVA_Z2l32Oh.webp"
+                  alt="A scenic mountain view"
+                />
+                <figcaption>A beautiful mountain at sunrise.</figcaption>
+              </figure>
+            </div>
+          </header>
+          <div data-pagefind-body>
+            <div></div>
+            <div class="max-w-3xl mx-auto">
+              <p>
+                Lorem ipsum dolor sit amet,
+                <strong>consectetur</strong> adipiscing elit.
+                <em>Nullam ut sapien</em> vitae quam fringilla luctus.
+                <a href="#">Praesent ullamcorper</a> imperdiet tellus.
+                <abbr title="HyperText Markup Language">HTML</abbr> is the
+                standard for documents.
+              </p>
+              <a href="/public/pages/article.html">article 1</a> <br />
+              <a href="/public/pages/article copy.html">article 2</a><br />
+              <a href="/public/pages/article copy 2.html">article 3</a>
+              <h2>Subheading: Sed Ut Perspiciatis</h2>
+              <p>
+                Sed ut perspiciatis unde omnis iste natus error sit voluptatem
+                accusantium doloremque laudantium.
+              </p>
+
+              <blockquote>
+                <p>
+                  “Neque porro quisquam est qui dolorem ipsum quia dolor sit
+                  amet, consectetur, adipisci velit.”
+                </p>
+              </blockquote>
+
+              <h3>Unordered List</h3>
+              <ul>
+                <li>Lorem ipsum dolor sit</li>
+                <li>Consectetur adipiscing</li>
+                <li>Tempor incididunt ut</li>
+              </ul>
+
+              <h3>Ordered List</h3>
+              <ol>
+                <li>First item</li>
+                <li>Second item</li>
+                <li>Third item</li>
+              </ol>
+
+              <h3>Inline Code</h3>
+              <p>
+                Use the <code>tailwind.config.js</code> file to customize your
+                setup.
+              </p>
+
+              <h3>Code Block</h3>
+              <pre><code class="language-js">
+// Simple JavaScript Example
+function greet(name) {
+  return `Hello, ${name}!`;
+}
+  </code></pre>
+
+              <h3>Image</h3>
+              <p>
+                <img
+                  src="https://qurno-astro.vercel.app/_astro/03.D9bzMuxc_Z1JllCO.webp"
+                  alt="Placeholder image"
+                />
+              </p>
+
+              <h3>Table</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Feature</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Prose</td>
+                    <td>Typography plugin in Tailwind</td>
+                  </tr>
+                  <tr>
+                    <td>Utility-first</td>
+                    <td>Focus on small, composable classes</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h3>Horizontal Rule</h3>
+              <hr />
+
+              <h3>Superscript & Subscript</h3>
+              <p>
+                E = mc<sup>2</sup> is Einstein’s theory. The chemical formula of
+                water is H<sub>2</sub>O.
+              </p>
+
+              <h3>Definition List</h3>
+              <dl>
+                <dt>Tailwind</dt>
+                <dd>A utility-first CSS framework.</dd>
+                <dt>Typography</dt>
+                <dd>A plugin to style prose content.</dd>
+              </dl>
+            </div>
+            <div></div>
+          </div>
+          <footer></footer>
+        </article>
+      </div>
+    </main>
+
+    <footer class="">
+      <div class="bg-base-200 text-base-content py-10">
+        <div class="container mx-auto footer sm:footer-horizontal gap-4">
+          <div class="mx-auto sm:mx-0 w-80 px-10">
+            <h6 class="footer-title mx-auto">Write to Us</h6>
+            <form
+              action="https://formsubmit.co/f64099d59e853868002b1214114b77a1"
+              method="POST"
+              class="flex flex-col gap-4 w-full"
+            >
+              <div class="w-full">
+                <label class="input validator input-info">
+                  <svg
+                    class="h-[1em] opacity-50"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                  >
+                    <g
+                      stroke-linejoin="round"
+                      stroke-linecap="round"
+                      stroke-width="2.5"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <path
+                        d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"
+                      ></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </g>
+                  </svg>
+                  <input
+                    type="text"
+                    name="name"
+                    autocomplete="name"
+                    placeholder="Full Name"
+                    required
+                    minlength="3"
+                  />
+                </label>
+                <p class="validator-hint hidden">
+                  Must be at least 3 characters
+                </p>
+              </div>
+
+              <div class="w-full">
+                <label class="input validator input-info">
+                  <svg
+                    class="h-[1em] opacity-50"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                  >
+                    <g
+                      stroke-linejoin="round"
+                      stroke-linecap="round"
+                      stroke-width="2.5"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                      <path
+                        d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"
+                      ></path>
+                    </g>
+                  </svg>
+                  <input
+                    type="email"
+                    name="email"
+                    autocomplete="email"
+                    placeholder="Email"
+                    required="required"
+                  />
+                </label>
+                <div class="validator-hint hidden">
+                  Enter valid email address
+                </div>
+              </div>
+
+              <div class="w-full">
+                <textarea
+                  name="message"
+                  class="textarea validator textarea-info"
+                  required
+                  placeholder="Write your message here"
+                ></textarea>
+                <input type="hidden" name="_captcha" value="false" />
+                <input
+                  type="hidden"
+                  name="_next"
+                  value="http://127.0.0.1:5500/public/index.html"
+                />
+              </div>
+
+              <div>
+                <button class="btn btn-info font-bold w-full" type="submit">
+                  Send
+                </button>
+              </div>
+            </form>
+          </div>
+          <nav class="mx-auto sm:mx-0">
+            <h6 class="footer-title mx-auto sm:mx-0">Services</h6>
+            <a class="link link-hover mx-auto sm:mx-0">Branding</a>
+            <a class="link link-hover mx-auto sm:mx-0">Design</a>
+            <a class="link link-hover mx-auto sm:mx-0">Marketing</a>
+            <a class="link link-hover mx-auto sm:mx-0">Advertisement</a>
+          </nav>
+          <nav class="mx-auto sm:mx-0">
+            <h6 class="footer-title mx-auto sm:mx-0">Company</h6>
+            <a class="link link-hover mx-auto sm:mx-0">About us</a>
+            <a class="link link-hover mx-auto sm:mx-0">Contact</a>
+            <a class="link link-hover mx-auto sm:mx-0">Jobs</a>
+            <a class="link link-hover mx-auto sm:mx-0">Press kit</a>
+          </nav>
+          <nav class="mx-auto sm:mx-0">
+            <h6 class="footer-title mx-auto sm:mx-0">Legal</h6>
+            <a class="link link-hover mx-auto sm:mx-0">Terms of use</a>
+            <a class="link link-hover mx-auto sm:mx-0">Privacy policy</a>
+            <a class="link link-hover mx-auto sm:mx-0">Cookie policy</a>
+          </nav>
+        </div>
+      </div>
+      <div
+        class="bg-base-200 text-base-content border-base-300 border-t px-10 py-4"
+      >
+        <div class="container mx-auto footer">
+          <aside
+            class="grid-flow-row md:grid-flow-col items-center text-center md:text-left mx-auto md:mx-0"
+          >
+            <div class="mx-auto md:mx-0">
+              <a class="btn btn-ghost btn-xl">Subella.Org</a>
+            </div>
+            <p>
+              Subella Foundation
+              <br />
+              Providing reliable tech since 1992
+            </p>
+          </aside>
+          <nav
+            class="md:place-self-center md:justify-self-end justify-self-center"
+          >
+            <div class="grid grid-flow-col gap-4">
+              <a>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  class="fill-current"
+                >
+                  <path
+                    d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"
+                  ></path>
+                </svg>
+              </a>
+              <a>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  class="fill-current"
+                >
+                  <path
+                    d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"
+                  ></path>
+                </svg>
+              </a>
+              <a>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  class="fill-current"
+                >
+                  <path
+                    d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"
+                  ></path>
+                </svg>
+              </a>
+            </div>
+          </nav>
+        </div>
+      </div>
+      <div
+        class="footer sm:footer-horizontal footer-center bg-base-300 text-base-content p-4"
+      >
+        <aside>
+          <p>Copyright © 2025 - All right reserved by ACME Industries Ltd</p>
+        </aside>
+      </div>
+    </footer>
+    <script src="cdn/script.js"></script>
+  </body>
+</html>

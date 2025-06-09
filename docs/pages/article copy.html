@@ -12,12 +12,12 @@
       } catch (e) {}
     </script>
     <title>Document</title>
-
-    <link rel="stylesheet" href="/public/styles.css" type="text/css" />
-    <link rel="stylesheet" href="/public/cdn/daisyui.css" type="text/css" />
-    <script src="/public/cdn/tailwindcss.js"></script>
-    <script defer src="/public/cdn/alpinejs.min.js"></script>
-    <script defer src="/public/cdn/htmx.min.js"></script>
+    <base href="../" />
+    <link rel="stylesheet" href="cdn/styles.css" type="text/css" />
+    <link rel="stylesheet" href="cdn/daisyui.css" type="text/css" />
+    <script src="cdn/tailwindcss.js"></script>
+    <script defer src="cdn/alpinejs.min.js"></script>
+    <script defer src="cdn/htmx.min.js"></script>
   </head>
   <body
     class="m-0 p-0"
@@ -38,30 +38,26 @@
         max="100"
       ></progress>
     </div>
+
     <header
       x-data="{ search: false }"
       x-init="
     $watch('search', value => {
-      if (value) {
-        navbarScroll.disable();
-        document.querySelector('[xw-search-hide]')?.classList.add('hidden');
-        document.querySelector('[xw-search-show]')?.classList.remove('hidden');
-        } else {
-        navbarScroll.enable();
-        document.querySelector('[xw-search-hide]')?.classList.remove('hidden');
-        document.querySelector('[xw-search-show]')?.classList.add('hidden');
+       if (typeof navbarScroll !== 'undefined') {
+        value ? navbarScroll.disable() : navbarScroll.enable();
       }
+
+      document.querySelectorAll('[xw-search-hide]').forEach(el => el.classList.toggle('hidden', value));
+      document.querySelectorAll('[xw-search-show]').forEach(el => el.classList.toggle('hidden', !value));
     });
 
-    document.body.addEventListener('htmx:beforeRequest', () => {
-      search = false;
-    });
+    document.body.addEventListener('htmx:beforeRequest', () => { $data.search = false });
   "
       class="w-full"
     >
       <div
         id="navbar"
-        class="bg-base-100 shadow-sm transition-all duration-300 fixed w-full z-[99] top-0 pt-1.5"
+        class="bg-base-100 shadow-sm transition-all duration-300 fixed w-full z-[99] top-0 left-0 pt-1.5"
       >
         <div class="navbar container mx-auto items-center">
           <div class="navbar-start" x-show="!search">
@@ -149,7 +145,7 @@
           </div>
 
           <div
-            class="flex flex-1 mr-2 gap-2"
+            class="flex flex-1 mx-2"
             x-show="search"
             x-init="$watch('search', value => value && $nextTick(() => $refs.input.focus()))"
           >
@@ -235,11 +231,11 @@
         </div>
       </div>
       <aside
-        class="h-screen fixed pt-20 w-full z-[50] bg-base-100"
+        class="h-screen fixed pt-20 w-full z-[51] bg-base-100"
         x-show="search"
       >
         <div class="container mx-auto pt-4 w-full h-auto">
-          <div id="search-title" class="prose pb-4 px-4 sm:px-0"></div>
+          <div id="search-title" class="prose pb-4 px-4"></div>
           <div class="h-dvh overflow-x-hidden overflow-y-auto px-0 sm:px-4">
             <div
               id="search-results"
@@ -257,10 +253,8 @@
         </div>
       </aside>
     </header>
-    <main
-      class="min-h-screen container mx-auto px-4 [&>#mainElement]:pt-20"
-      xw-search-hide
-    >
+
+    <main class="min-h-screen container mx-auto px-4 [&>#mainElement]:pt-20">
       <div id="mainElement">
         <article
           class="prose prose-img:rounded-lg prose-a:hover:text-secondary mx-auto max-w-full"
@@ -394,9 +388,9 @@
                 <abbr title="HyperText Markup Language">HTML</abbr> is the
                 standard for documents.
               </p>
-              <a href="/public/pages/article.html">article 1</a> <br />
-              <a href="/public/pages/article copy.html">article 2</a><br />
-              <a href="/public/pages/article copy 2.html">article 3</a>
+              <a href="pages/article.html">article 1</a> <br />
+              <a href="pages/article copy.html">article 2</a><br />
+              <a href="pages/article copy 2.html">article 3</a>
               <h2>Subheading: Sed Ut Perspiciatis</h2>
               <p>
                 Sed ut perspiciatis unde omnis iste natus error sit voluptatem
@@ -490,7 +484,7 @@ function greet(name) {
       </div>
     </main>
 
-    <footer xw-search-hide>
+    <footer class="">
       <div class="bg-base-200 text-base-content py-10">
         <div class="container mx-auto footer sm:footer-horizontal gap-4">
           <div class="mx-auto sm:mx-0 w-80 px-10">
@@ -682,6 +676,6 @@ function greet(name) {
         </aside>
       </div>
     </footer>
-    <script src="/public/cdn/script.js"></script>
+    <script src="cdn/script.js"></script>
   </body>
 </html>
